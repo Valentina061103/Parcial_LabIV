@@ -28,11 +28,19 @@ export const getBookById = async (req, res) => {
 export const createBook = async (req, res) => {
     try{
         const {titulo, resumen, genero, publicacion, disponible} = req.body;
-    
+        
+
+        //campos obligatorios
         if(!titulo || !genero || !publicacion || disponible === undefined){
             return res.status(400).json({error: 'Faltan campos obligatorios'});
         }
-    
+
+        //existencia del auto
+        const existingAuthor = await Author.findById(autor);
+        if (!existingAuthor) {
+            return res.status(404).json({ error: 'Autor no encontrado' });
+        }
+        
         const book = new Book({titulo, resumen,genero,publicacion,disponible});
         const saveBook = await book.save();
         res.status(201).json(saveBook);
@@ -55,6 +63,9 @@ export const updateBook = async (req, res) => {
 
 //eliminar un libro
 export const deleteBook = async (req, res) => {
+    const {id} = req.params;
+
+
     try{
         const authorsWithBook = await Author.find({libros: req.param.id});
 
